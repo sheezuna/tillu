@@ -109,7 +109,7 @@ export class AnalyticsService {
       where: {
         branchId,
         createdAt: today,
-        status: 'completed',
+        status: 'delivered',
       },
     });
 
@@ -118,7 +118,7 @@ export class AnalyticsService {
       .select('SUM(order.total)', 'revenue')
       .where('order.branchId = :branchId', { branchId })
       .andWhere('order.createdAt >= :today', { today })
-      .andWhere('order.status = :status', { status: 'completed' })
+      .andWhere('order.status = :status', { status: 'delivered' })
       .getRawOne();
 
     const pendingOrders = await this.orderRepository.count({
