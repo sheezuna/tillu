@@ -1,0 +1,21 @@
+{
+  "name": "Tillu POS Terminal",
+  "short_name": "Tillu POS",
+  "description": "Smart POS Terminal for Food & Takeaway Businesses",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
