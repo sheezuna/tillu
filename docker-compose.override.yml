@@ -1,0 +1,52 @@
+# Override file for local development
+# This file is automatically loaded by docker-compose
+version: '3.8'
+
+services:
+  api-gateway:
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://tillu_user:tillu_password@postgres:5432/tillu_pos
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=dev-jwt-secret-change-in-production
+    volumes:
+      - ./apps/api-gateway:/app/apps/api-gateway
+      - ./packages:/app/packages
+      - /app/node_modules
+    command: ["npm", "run", "start:dev"]
+
+  pos-terminal:
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
+    volumes:
+      - ./apps/pos-terminal:/app/apps/pos-terminal
+      - ./packages:/app/packages
+      - /app/node_modules
+
+  customer-pwa:
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
+    volumes:
+      - ./apps/customer-pwa:/app/apps/customer-pwa
+      - ./packages:/app/packages
+      - /app/node_modules
+
+  manager-dashboard:
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
+    volumes:
+      - ./apps/manager-dashboard:/app/apps/manager-dashboard
+      - ./packages:/app/packages
+      - /app/node_modules
+
+  kitchen-display:
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
+    volumes:
+      - ./apps/kitchen-display:/app/apps/kitchen-display
+      - ./packages:/app/packages
+      - /app/node_modules
