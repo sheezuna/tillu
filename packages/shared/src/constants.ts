@@ -18,6 +18,15 @@ export const WEBSOCKET_EVENTS = {
   KITCHEN_UPDATE: 'kitchen:update',
   INVENTORY_UPDATE: 'inventory:update',
   STAFF_NOTIFICATION: 'staff:notification',
+  USER_JOINED: 'user:joined',
+  USER_LEFT: 'user:left',
+  USER_DISCONNECTED: 'user:disconnected',
+  INVENTORY_ALERT: 'inventory:alert',
+  STAFF_MESSAGE: 'staff:message',
+  DELIVERY_READY: 'delivery:ready',
+  FLASH_OFFER: 'flash:offer',
+  SYSTEM_ALERT: 'system:alert',
+  BRANCH_METRICS: 'branch:metrics',
 } as const;
 
 export const USER_PERMISSIONS = {

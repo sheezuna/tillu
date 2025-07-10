@@ -21,6 +21,8 @@ export default function POSTerminal() {
   const [currentOrder, setCurrentOrder] = useState<OrderItem[]>([])
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
   const [isListening, setIsListening] = useState(false)
+  const [isOnline, setIsOnline] = useState(true)
+  const [pendingOrders, setPendingOrders] = useState(0)
   const [selectedCategory, setSelectedCategory] = useState('all')
 
   useEffect(() => {
@@ -78,18 +80,86 @@ export default function POSTerminal() {
   }
 
   const startVoiceInput = () => {
-    setIsListening(true)
-    setTimeout(() => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Speech recognition not supported in this browser')
+      return
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    const recognition = new SpeechRecognition()
+    
+    recognition.continuous = false
+    recognition.interimResults = false
+    recognition.lang = 'en-GB'
+
+    recognition.onstart = () => {
+      setIsListening(true)
+    }
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript
+      setSearchQuery(transcript.toLowerCase())
       setIsListening(false)
-      setSearchQuery('chicken tikka')
-    }, 2000)
+    }
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error)
+      setIsListening(false)
+      if (event.error === 'not-allowed') {
+        alert('Microphone access denied. Please allow microphone access and try again.')
+      } else {
+        alert('Speech recognition failed. Please try again.')
+      }
+    }
+
+    recognition.onend = () => {
+      setIsListening(false)
+    }
+
+    recognition.start()
   }
 
-  const processOrder = () => {
+  const processOrder = async () => {
     if (currentOrder.length === 0) return
     
-    alert(`Order processed! Total: £${getTotalAmount().toFixed(2)}`)
-    setCurrentOrder([])
+    const orderData = {
+      items: currentOrder,
+      total: getTotalAmount(),
+      timestamp: Date.now(),
+      customerInfo: { name: 'Walk-in Customer' },
+    }
+    
+    try {
+      if (isOnline) {
+        const response = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData),
+        })
+        
+        if (response.ok) {
+          alert(`Order processed online! Total: £${getTotalAmount().toFixed(2)}`)
+        } else {
+          throw new Error('Online order failed')
+        }
+      } else {
+        await offlineSyncService.saveOfflineOrder(orderData)
+        alert(`Order saved offline! Total: £${getTotalAmount().toFixed(2)}`)
+        setPendingOrders(prev => prev + 1)
+      }
+      
+      setCurrentOrder([])
+    } catch (error) {
+      console.error('Order processing failed:', error)
+      try {
+        await offlineSyncService.saveOfflineOrder(orderData)
+        alert(`Order saved offline due to connection issue! Total: £${getTotalAmount().toFixed(2)}`)
+        setPendingOrders(prev => prev + 1)
+        setCurrentOrder([])
+      } catch (offlineError) {
+        alert('Failed to process order. Please try again.')
+      }
+    }
   }
 
   return (
